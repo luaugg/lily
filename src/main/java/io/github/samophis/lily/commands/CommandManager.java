@@ -41,6 +41,9 @@ public class CommandManager {
     }
 
     public static void handleMessage(Message message) {
+        if (message.guildId() == null)
+            return;
+
         final var content = message.content();
         if (!content.startsWith("<@777228923356053544>") && !content.startsWith("<@!777228923356053544>"))
             return;
@@ -57,9 +60,23 @@ public class CommandManager {
         args.remove(0);
         args.remove(0);
 
+        final var botPermissions = pair.command.botPermissions();
+        final var hasBotPerms = message.guild()
+                .flatMap(guild -> guild.member(777228923356053544L))
+                .map(member -> member.hasPermissions(botPermissions))
+                .blockingGet(); // todo: REMOVE THIS, DO RXJAVA PROPERLY
+
+        if (!hasBotPerms) // NPE maybe?
+            return;
+
+        final var userPermissions = pair.command.userPermissions();
+        final var hasUserPerms = message.member().hasPermissions(userPermissions);
+        if (!hasUserPerms)
+            return;
+
         EXECUTOR.execute(() -> {
             try {
-                pair.method.invoke(null, message, args);
+                pair.method.invoke(pair.method.getDeclaringClass(), message, args);
             } catch (Exception exception) {
                 LOGGER.error("Error when invoking command " + split[1], exception);
             }
