@@ -3,6 +3,7 @@ package gg.samantha.lily.commands;
 import net.dv8tion.jda.api.entities.Message;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
 /*
 
@@ -14,6 +15,9 @@ commands in lily will have natural language prefixes for me only:
 
 @SuppressWarnings("unused")
 public interface Command {
+    @Nonnull
+    List<String> prefixes();
+
     @Nonnull
     String description();
 
