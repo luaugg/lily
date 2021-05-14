@@ -16,6 +16,7 @@ public class TestCommand extends AbstractCommandBase {
     @Override
     public void execute(@NotNull Message message, @NotNull String trimmedContent) {
         final var currentTime = System.nanoTime();
+
         message.getChannel().sendMessage("Pong!").queue(msg -> {
             final var differenceInTime = (System.nanoTime() - currentTime) / 1000000f;
             final var formattedTime = String.format("Latency: %.2fms", differenceInTime);
