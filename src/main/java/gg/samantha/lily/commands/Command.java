@@ -27,5 +27,5 @@ public interface Command {
     @Nonnull
     Category category();
 
-    void execute(@Nonnull Message message);
+    void execute(@Nonnull Message message, @Nonnull String trimmedContent);
 }
