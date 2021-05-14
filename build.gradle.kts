@@ -10,6 +10,7 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:4.2.1_262")
     implementation("io.sentry:sentry-logback:5.0.0-beta.3")
+    implementation("redis.clients:jedis:3.6.0")
 }
 
 application {
