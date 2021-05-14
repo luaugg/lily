@@ -16,12 +16,10 @@ public class Main extends ListenerAdapter {
 
     public static void main(String... args) throws LoginException, InterruptedException {
         final var token = System.getenv("LILY_BOT_TOKEN");
-        final var dsn = System.getenv("LILY_SENTRY_DSN");
         final var jda = JDABuilder.createDefault(token)
                 .addEventListeners(INSTANCE)
                 .build();
 
-        Sentry.init(dsn);
         jda.awaitReady();
     }
 
