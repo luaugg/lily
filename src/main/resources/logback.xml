@@ -1,0 +1,12 @@
+<configuration>
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%boldBlue([%d{dd/MM/yyyy HH:mm:ss}]) %boldGreen([%level]) %boldWhite([%logger{0}]) %boldRed(-->) %white(%msg) %n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="Console" />
+        <appender-ref ref="Sentry" />
+    </root>
+</configuration>
