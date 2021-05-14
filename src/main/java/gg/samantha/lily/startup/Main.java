@@ -12,12 +12,13 @@ import javax.security.auth.login.LoginException;
 
 public class Main extends ListenerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Main INSTANCE = new Main(); // singleton
 
     public static void main(String... args) throws LoginException, InterruptedException {
         final var token = System.getenv("LILY_BOT_TOKEN");
         final var dsn = System.getenv("LILY_SENTRY_DSN");
         final var jda = JDABuilder.createDefault(token)
-                .addEventListeners(new Main())
+                .addEventListeners(INSTANCE)
                 .build();
 
         Sentry.init(dsn);
