@@ -3,4 +3,5 @@
 gradle
 src/main/resources
 build
-run.sh
+*.bat
+*.sh
