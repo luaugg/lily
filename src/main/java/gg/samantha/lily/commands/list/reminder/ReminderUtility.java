@@ -33,7 +33,7 @@ public class ReminderUtility {
                     final var split = value.split(" ");
                     final var channel = jda.getTextChannelById(split[0]);
                     final var offset = Long.parseLong(split[2]) - System.currentTimeMillis() / 1000;
-                    final var reminder = split[3];
+                    final var reminder = split[3].equals("...") ? null : split[3];
                     if (channel == null || offset < 0)
                         return;
 
