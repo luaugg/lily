@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class SetReminderCommand extends AbstractCommandBase {
-    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(:?to)? (.+)? in (\\d+)([smhdwy])");
+    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(?:to)? (.+)? in (\\d+)([smhdwy])");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
             .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
             .withZone(ZoneId.from(ZoneOffset.UTC));
