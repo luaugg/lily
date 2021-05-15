@@ -42,7 +42,7 @@ public class ReminderUtility {
     }
 
     public void addReminderEntry(@NotNull Message message, @NotNull User user, long timestamp, @Nullable String reminder) {
-        final var remToString = reminder == null ? "..." : reminder;
+        final var remToString = reminder == null ? "..." : reminder.substring(0, reminder.length() - 1);
         jedis.hset(".reminders", message.getId(), String.format("%s %s %s %s", message.getChannel().getId(),
                 user.getId(), timestamp, remToString));
     }
