@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class SetReminderCommand extends AbstractCommandBase {
-    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(.+) in (\\d+)([smhdwy])");
+    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(:?to)? (.+)? in (\\d+)([smhdwy])");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
             .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
             .withZone(ZoneId.from(ZoneOffset.UTC));
@@ -26,7 +26,7 @@ public class SetReminderCommand extends AbstractCommandBase {
     @NotNull
     @Override
     public List<String> prefixes() {
-        return List.of("remind me to", "can you remind me to", "i want to be reminded to");
+        return List.of("remind me", "can you remind me", "i want to be reminded");
     }
 
     @Override

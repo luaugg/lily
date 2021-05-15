@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
 
 import java.util.concurrent.Executors;
@@ -33,7 +34,6 @@ public class ReminderUtility {
                     final var channel = jda.getTextChannelById(split[0]);
                     final var offset = Long.parseLong(split[2]) - System.currentTimeMillis() / 1000;
                     final var reminder = split[3];
-
                     if (channel == null || offset < 0)
                         return;
 
@@ -41,18 +41,20 @@ public class ReminderUtility {
                 });
     }
 
-    public void addReminderEntry(@NotNull Message message, @NotNull User user, long timestamp, @NotNull String reminder) {
+    public void addReminderEntry(@NotNull Message message, @NotNull User user, long timestamp, @Nullable String reminder) {
+        final var remToString = reminder == null ? "..." : reminder;
         jedis.hset(".reminders", message.getId(), String.format("%s %s %s %s", message.getChannel().getId(),
-                user.getId(), timestamp, reminder));
+                user.getId(), timestamp, remToString));
     }
 
     public void removeReminderEntry(@NotNull String messageId) {
         jedis.hdel(".reminders", messageId);
     }
 
-    public void scheduleReminder(@NotNull MessageChannel channel, @NotNull String reminder,
+    public void scheduleReminder(@NotNull MessageChannel channel, @Nullable String reminder,
                              @NotNull String messageId, long delay) {
-        channel.sendMessageFormat("Heyo. You asked to be reminded to: `%s`.", reminder)
+        final var formatted = "Heyo. You asked to be reminded" + (reminder == null ? "." : " to: `%s`.");
+        channel.sendMessageFormat(formatted, reminder)
                 .referenceById(messageId)
                 .queueAfter(delay, TimeUnit.SECONDS, ignored -> removeReminderEntry(messageId));
     }
