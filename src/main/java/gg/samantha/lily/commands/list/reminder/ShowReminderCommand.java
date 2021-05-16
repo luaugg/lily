@@ -36,7 +36,7 @@ public class ShowReminderCommand extends AbstractCommandBase {
         reminderUtility.jedis.hgetAll(".reminders").forEach((key, value) -> {
             if (value.startsWith(author.getId())) {
                 final var split = value.split(" ", 4);
-                final var reminder = split[2];
+                final var reminder = split[3];
                 reminders.add(key);
                 embedBuilder.appendDescription(String.format("\n**#%d:** %s", reminders.size(), reminder));
             }
