@@ -11,12 +11,12 @@ import java.util.function.Consumer;
 public class EventWaiter {
     private EventWaiter() { }
 
-    public static void listenForResponse(@NotNull JDA jda, long userId, @NotNull Consumer<Message> handler) {
-        jda.addEventListener(new ListenerAdapter() {
+    public static void listenForReply(@NotNull Message original, @NotNull Consumer<Message> handler) {
+        original.getJDA().addEventListener(new ListenerAdapter() {
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-                if (event.getMessage().getAuthor().getIdLong() == userId) {
-                    jda.removeEventListener(this);
+                if (original.equals(event.getMessage().getReferencedMessage())) {
+                    original.getJDA().removeEventListener(this);
                     handler.accept(event.getMessage());
                 }
             }
