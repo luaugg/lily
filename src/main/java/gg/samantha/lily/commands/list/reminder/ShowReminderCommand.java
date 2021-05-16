@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class ShowReminderCommand extends AbstractCommandBase {
@@ -36,16 +35,22 @@ public class ShowReminderCommand extends AbstractCommandBase {
 
         reminderUtility.jedis.hgetAll(".reminders").forEach((key, value) -> {
             if (value.startsWith(author.getId())) {
-                final var split = value.split(" ", 3);
+                final var split = value.split(" ", 4);
                 final var reminder = split[2];
                 reminders.add(key);
                 embedBuilder.appendDescription(String.format("\n**#%d:** %s", reminders.size(), reminder));
             }
         });
 
-        message.getChannel()
-                .sendMessage(embedBuilder.build())
-                .reference(message)
+        if (reminders.isEmpty()) {
+            message.reply("You don't seem to have any reminders. That's strange.")
+                    .mentionRepliedUser(false)
+                    .queue();
+
+            return;
+        }
+
+        message.reply(embedBuilder.build())
                 .mentionRepliedUser(false)
                 .queue(msg ->
                     EventWaiter.listenForReply(msg, response -> {
@@ -55,7 +60,7 @@ public class ShowReminderCommand extends AbstractCommandBase {
                         for (var index : split) {
                             try {
                                 final var indexAsInteger = Integer.parseUnsignedInt(index);
-                                toBeRemoved.add(indexAsInteger);
+                                toBeRemoved.add(indexAsInteger - 1);
                             } catch (NumberFormatException exception) {
                                 message.getChannel().sendMessage("Try giving me valid integers next time.")
                                         .reference(response)
