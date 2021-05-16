@@ -5,18 +5,11 @@ import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class SetReminderCommand extends AbstractCommandBase {
     private static final Pattern RELATIVE_PATTERN = Pattern.compile("(?:to )?(.+ )?in (\\d+)([smhdwy])\\??");
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
-            .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
-            .withZone(ZoneId.from(ZoneOffset.UTC));
     private final ReminderUtility reminderUtility;
 
     public SetReminderCommand(@NotNull ReminderUtility reminderUtility) {
@@ -53,9 +46,10 @@ public class SetReminderCommand extends AbstractCommandBase {
         };
 
         final var reminderTimestamp = Instant.now().plusSeconds(offset);
+        final var formatted = ReminderUtility.TIME_FORMATTER.format(reminderTimestamp);
         reminderUtility.addReminderEntry(message,System.currentTimeMillis() / 1000 + offset, reminder);
         reminderUtility.scheduleReminder(channelId, reminder, message.getId(), offset);
-        message.replyFormat("Awesome. I'll remind you about this at **%s** UTC.", TIME_FORMATTER.format(reminderTimestamp))
+        message.replyFormat("Awesome. I'll remind you about this at **%s** UTC.", formatted)
                 .mentionRepliedUser(false)
                 .queue();
     }

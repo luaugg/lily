@@ -6,6 +6,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
 
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -20,6 +24,10 @@ import java.util.concurrent.TimeUnit;
 public class ReminderUtility {
     final JDA jda;
     final Jedis jedis;
+    static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
+            .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
+            .withZone(ZoneId.from(ZoneOffset.UTC));
+
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Map<String, ScheduledFuture<?>> futureMap = new HashMap<>();
 

@@ -7,8 +7,11 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ShowReminderCommand extends AbstractCommandBase {
     private final ReminderUtility reminderUtility;
@@ -33,12 +36,21 @@ public class ShowReminderCommand extends AbstractCommandBase {
                         "message with a list of space-separated numbers.\n")
                 .setColor(EmbedUtility.highestRoleColor(message.getGuild().getSelfMember()));
 
-        reminderUtility.jedis.hgetAll(".reminders").forEach((key, value) -> {
-            if (value.startsWith(author.getId())) {
-                final var split = value.split(" ", 4);
+        final var reminderEntrySet = reminderUtility.jedis.hgetAll(".reminders")
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().startsWith(author.getId()))
+                .sorted(Comparator.comparingLong(entry -> Long.parseLong(entry.getValue().split(" ", 4)[2])))
+                .collect(Collectors.toList());
+
+        reminderEntrySet.forEach(entry -> {
+            if (entry.getValue().startsWith(author.getId())) {
+                final var split = entry.getValue().split(" ", 4);
                 final var reminder = split[3];
-                reminders.add(key);
-                embedBuilder.appendDescription(String.format("\n**#%d:** %s", reminders.size(), reminder));
+                reminders.add(entry.getKey());
+                final var timestamp = Instant.ofEpochSecond(Long.parseLong(split[2]));
+                embedBuilder.appendDescription(String.format("\n**#%d:** %s | %s UTC", reminders.size(), reminder,
+                        ReminderUtility.TIME_FORMATTER.format(timestamp)));
             }
         });
 
