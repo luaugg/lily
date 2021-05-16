@@ -6,8 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import redis.clients.jedis.Jedis;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 // I know I could use a relational database for this (which would make my life a lot easier in the long run)
@@ -17,7 +20,8 @@ import java.util.concurrent.TimeUnit;
 public class ReminderUtility {
     final JDA jda;
     final Jedis jedis;
-    final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final Map<String, ScheduledFuture<?>> futureMap = new HashMap<>();
 
     public ReminderUtility(@NotNull JDA jda, @NotNull Jedis jedis) {
         this.jda = jda;
@@ -51,9 +55,20 @@ public class ReminderUtility {
         jedis.hdel(".reminders", messageId);
     }
 
+    public void unscheduleReminder(@NotNull String messageId) {
+        final var future = futureMap.get(messageId);
+        if (future == null)
+            return;
+
+        if (!future.isCancelled())
+            future.cancel(false);
+
+        futureMap.remove(messageId);
+    }
+
     public void scheduleReminder(@NotNull String channelId, @NotNull String reminder,
                              @NotNull String messageId, long delay) {
-        scheduler.schedule(() -> {
+        final var future = scheduler.schedule(() -> {
             final var channel = jda.getTextChannelById(channelId);
 
             if (channel != null) {
@@ -64,6 +79,9 @@ public class ReminderUtility {
             }
 
             removeReminderEntry(messageId);
+            unscheduleReminder(messageId);
         }, delay, TimeUnit.SECONDS);
+
+        futureMap.put(messageId, future);
     }
 }
