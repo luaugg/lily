@@ -32,8 +32,8 @@ public class ShowReminderCommand extends AbstractCommandBase {
         final var author = message.getAuthor();
         final var embedBuilder = new EmbedBuilder()
                 .setAuthor("Your Reminders", null, author.getEffectiveAvatarUrl())
-                .setDescription("Here are a list of your reminders. You may delete one of these by replying to this " +
-                        "message with a list of space-separated numbers.\n")
+                .setDescription("Here is a list of your reminders. You may delete several of these by replying to " +
+                        "this message with a list of space-separated numbers.\n")
                 .setColor(EmbedUtility.highestRoleColor(message.getGuild().getSelfMember()));
 
         final var reminderEntrySet = reminderUtility.jedis.hgetAll(".reminders")
