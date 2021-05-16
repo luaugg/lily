@@ -1,5 +1,6 @@
 package gg.samantha.lily.commands;
 
+import gg.samantha.lily.commands.list.debug.EvaluateCommand;
 import gg.samantha.lily.commands.list.reminder.ReminderUtility;
 import gg.samantha.lily.commands.list.reminder.SetReminderCommand;
 import gg.samantha.lily.commands.list.reminder.ShowReminderCommand;
@@ -37,6 +38,7 @@ public class Manager extends ListenerAdapter {
         // Adding commands
         commands.add(new SetReminderCommand(reminderUtility));
         commands.add(new ShowReminderCommand(reminderUtility));
+        commands.add(new EvaluateCommand());
 
         // don't want to leak resources
         Runtime.getRuntime().addShutdownHook(new Thread(THREAD_POOL::shutdown));
