@@ -13,6 +13,7 @@ import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -21,7 +22,11 @@ public class Manager extends ListenerAdapter {
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final long OWNER_ID = Long.parseLong(System.getenv("LILY_BOT_OWNER"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Manager.class);
-    private static final Pattern PATTERN = Pattern.compile("(hey lily, |lily, )?(?:please )?(.+)\\??");
+    private static final Pattern PATTERN = Pattern.compile("(hey lily, |lily, |\uD83C\uDF3C |\uD83D\uDC90 " +
+            "|\uD83C\uDF38 |\uD83C\uDF3A |\uD83C\uDF39 |\uD83C\uDF3B |\uD83C\uDF37 )?(?:please )?(.+)\\??");
+
+    private static final String[] THANKS_RESPONSES = new String[] { "np", "nps", "yw", "ur welcome", "\uD83D\uDE33" };
+    private static final Random THANKS_RESPONSE_RANDOM = new Random();
     private final List<Command> commands = new ArrayList<>();
 
     public Manager(@NotNull JDA jda) {
@@ -39,6 +44,17 @@ public class Manager extends ListenerAdapter {
         final var message = event.getMessage();
         final var authorId = message.getAuthor().getIdLong();
         final var content = message.getContentRaw();
+
+        if (content.equals("thanks lily") || content.equals("thank you lily")) {
+            final var index = THANKS_RESPONSE_RANDOM.nextInt(THANKS_RESPONSES.length);
+            final var response = THANKS_RESPONSES[index];
+            message.getChannel().sendMessage(response)
+                    .reference(message)
+                    .mentionRepliedUser(false)
+                    .queue();
+
+            return;
+        }
 
         for (final var command : commands) {
             for (final var prefix : command.prefixes()) {
