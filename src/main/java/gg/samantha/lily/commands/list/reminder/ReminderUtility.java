@@ -30,32 +30,42 @@ public class ReminderUtility {
     public void scheduleReminders() {
         jedis.hgetAll(".reminders")
                 .forEach((key, value) -> {
-                    final var split = value.split(" ");
-                    final var channel = jda.getTextChannelById(split[0]);
-                    final var offset = Long.parseLong(split[2]) - System.currentTimeMillis() / 1000;
-                    final var reminder = split[3].equals("...") ? null : split[3];
-                    if (channel == null || offset < 0)
+                    final var split = value.split(" ", 3);
+                    final var channel = split[0];
+                    final var offset = Long.parseLong(split[1]) - System.currentTimeMillis() / 1000;
+                    final var reminder = split[2];
+
+                    if (offset < 0) {
+                        removeReminderEntry(key);
                         return;
+                    }
 
                     scheduleReminder(channel, reminder, key, offset);
                 });
     }
 
-    public void addReminderEntry(@NotNull Message message, @NotNull User user, long timestamp, @Nullable String reminder) {
-        final var remToString = reminder == null ? "..." : reminder.substring(0, reminder.length() - 1);
-        jedis.hset(".reminders", message.getId(), String.format("%s %s %s %s", message.getChannel().getId(),
-                user.getId(), timestamp, remToString));
+    public void addReminderEntry(@NotNull Message message, long timestamp, @Nullable String reminder) {
+        jedis.hset(".reminders", message.getId(), String.format("%s %s %s", message.getChannel().getId(),
+                timestamp, reminder));
     }
 
     public void removeReminderEntry(@NotNull String messageId) {
         jedis.hdel(".reminders", messageId);
     }
 
-    public void scheduleReminder(@NotNull MessageChannel channel, @Nullable String reminder,
+    public void scheduleReminder(@NotNull String channelId, @NotNull String reminder,
                              @NotNull String messageId, long delay) {
-        final var formatted = "Heyo. You asked to be reminded" + (reminder == null ? "." : " to: `%s`.");
-        channel.sendMessageFormat(formatted, reminder)
-                .referenceById(messageId)
-                .queueAfter(delay, TimeUnit.SECONDS, ignored -> removeReminderEntry(messageId));
+        scheduler.schedule(() -> {
+            final var channel = jda.getTextChannelById(channelId);
+
+            if (channel != null) {
+                final var formatted = "Heyo. You asked to be reminded" + (reminder.equals("...") ? "." : " to: `%s`.");
+                channel.sendMessageFormat(formatted, reminder)
+                        .referenceById(messageId)
+                        .queue();
+            }
+
+            removeReminderEntry(messageId);
+        }, delay, TimeUnit.SECONDS);
     }
 }

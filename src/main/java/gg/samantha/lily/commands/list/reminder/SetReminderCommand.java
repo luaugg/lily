@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class SetReminderCommand extends AbstractCommandBase {
-    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(?:to )?(.+ )?in (\\d+)([smhdwy])");
+    private static final Pattern RELATIVE_PATTERN = Pattern.compile("(?:to )?(.+ )?in (\\d+)([smhdwy])\\??");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter
             .ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.SHORT)
             .withZone(ZoneId.from(ZoneOffset.UTC));
@@ -31,9 +31,7 @@ public class SetReminderCommand extends AbstractCommandBase {
 
     @Override
     public void execute(@NotNull Message message, @NotNull String trimmedContent) {
-        final var channel = message.getChannel();
-        final var author = message.getAuthor();
-
+        final var channelId = message.getChannel().getId();
         final var matcher = RELATIVE_PATTERN.matcher(trimmedContent);
 
         if (!matcher.find()) {
@@ -41,7 +39,8 @@ public class SetReminderCommand extends AbstractCommandBase {
             return;
         }
 
-        final var reminder = matcher.group(1);
+        final var groupOne = matcher.group(1);
+        final var reminder = groupOne != null ? groupOne.substring(0, groupOne.length() - 1) : "...";
         final var amount = Long.parseLong(matcher.group(2));
         final var offset = switch (matcher.group(3)) {
             case "s" -> amount;
@@ -54,8 +53,8 @@ public class SetReminderCommand extends AbstractCommandBase {
         };
 
         final var reminderTimestamp = Instant.now().plusSeconds(offset);
-        reminderUtility.addReminderEntry(message, author, System.currentTimeMillis() / 1000 + offset, reminder);
-        reminderUtility.scheduleReminder(channel, reminder, message.getId(), offset);
+        reminderUtility.addReminderEntry(message,System.currentTimeMillis() / 1000 + offset, reminder);
+        reminderUtility.scheduleReminder(channelId, reminder, message.getId(), offset);
         message.replyFormat("Awesome. I'll remind you about this at **%s** UTC.", TIME_FORMATTER.format(reminderTimestamp))
                 .mentionRepliedUser(false)
                 .queue();
