@@ -15,11 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 
 public class Manager extends ListenerAdapter {
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final long OWNER_ID = Long.parseLong(System.getenv("LILY_BOT_OWNER"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Manager.class);
+    private static final Pattern PATTERN = Pattern.compile("(hey lily, |lily, )?(?:please )?(.+)\\??");
     private final List<Command> commands = new ArrayList<>();
 
     public Manager(@NotNull JDA jda) {
@@ -40,20 +42,19 @@ public class Manager extends ListenerAdapter {
 
         for (final var command : commands) {
             for (final var prefix : command.prefixes()) {
-                final int trimPosition;
-
-                if (authorId == OWNER_ID && content.startsWith(prefix)) {
-                    trimPosition = prefix.length() + 1;
-                } else if (content.startsWith("lily, " + prefix)) {
-                    trimPosition = prefix.length() + 7;
-                } else {
+                final var matcher = PATTERN.matcher(content);
+                if (!matcher.find())
                     continue;
-                }
 
-                final var trimmedContent = content.substring(trimPosition);
+                final var hasNoPrefix = matcher.group(1) == null;
+                final var commandString = matcher.group(2);
+                if ((hasNoPrefix && authorId != OWNER_ID) || !commandString.startsWith(prefix))
+                    continue;
+
+                final var trimmed = content.substring(content.indexOf(prefix) + prefix.length() + 1);
                 THREAD_POOL.execute(() -> {
                     try {
-                        command.execute(message, trimmedContent);
+                        command.execute(message, trimmed);
                     } catch (Exception exception) {
                         LOGGER.error("An error occurred while executing a command!", exception);
                         message.getChannel().sendMessage("an error occurred, go scream at sam").queue();
