@@ -70,7 +70,8 @@ public class Manager extends ListenerAdapter {
                 if ((hasNoPrefix && authorId != OWNER_ID) || !commandString.startsWith(prefix))
                     continue;
 
-                final var trimmed = content.substring(content.indexOf(prefix) + prefix.length() + 1);
+                final var trimPoint = Math.min(content.length(), content.indexOf(prefix) + prefix.length() + 1);
+                final var trimmed = content.substring(trimPoint);
                 THREAD_POOL.execute(() -> {
                     try {
                         command.execute(message, trimmed);
