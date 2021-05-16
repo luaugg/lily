@@ -23,6 +23,7 @@ public class Manager extends ListenerAdapter {
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
     private static final long OWNER_ID = Long.parseLong(System.getenv("LILY_BOT_OWNER"));
     private static final Logger LOGGER = LoggerFactory.getLogger(Manager.class);
+    // todo suppress warnings
     private static final Pattern PATTERN = Pattern.compile("(hey lily, |lily, |\uD83C\uDF3C |\uD83D\uDC90 " +
             "|\uD83C\uDF38 |\uD83C\uDF3A |\uD83C\uDF39 |\uD83C\uDF3B |\uD83C\uDF37 )?(?:please )?(.+)\\??");
 
