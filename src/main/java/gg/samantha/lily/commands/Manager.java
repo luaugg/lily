@@ -2,6 +2,7 @@ package gg.samantha.lily.commands;
 
 import gg.samantha.lily.commands.list.reminder.ReminderUtility;
 import gg.samantha.lily.commands.list.reminder.SetReminderCommand;
+import gg.samantha.lily.commands.list.reminder.ShowReminderCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -32,7 +33,10 @@ public class Manager extends ListenerAdapter {
         final var jedis = new Jedis("localhost", 6379);
         final var reminderUtility = new ReminderUtility(jda, jedis);
         reminderUtility.scheduleReminders();
+
+        // Adding commands
         commands.add(new SetReminderCommand(reminderUtility));
+        commands.add(new ShowReminderCommand(reminderUtility));
 
         // don't want to leak resources
         Runtime.getRuntime().addShutdownHook(new Thread(THREAD_POOL::shutdown));
