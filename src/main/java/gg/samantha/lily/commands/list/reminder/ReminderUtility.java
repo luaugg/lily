@@ -32,10 +32,10 @@ public class ReminderUtility {
     public void scheduleReminders() {
         jedis.hgetAll(".reminders")
                 .forEach((key, value) -> {
-                    final var split = value.split(" ", 3);
-                    final var channel = split[0];
-                    final var offset = Long.parseLong(split[1]) - System.currentTimeMillis() / 1000;
-                    final var reminder = split[2];
+                    final var split = value.split(" ", 4);
+                    final var channel = split[1];
+                    final var offset = Long.parseLong(split[2]) - System.currentTimeMillis() / 1000;
+                    final var reminder = split[3];
 
                     if (offset < 0) {
                         removeReminderEntry(key);
@@ -47,8 +47,8 @@ public class ReminderUtility {
     }
 
     public void addReminderEntry(@NotNull Message message, long timestamp, @Nullable String reminder) {
-        jedis.hset(".reminders", message.getId(), String.format("%s %s %s", message.getChannel().getId(),
-                timestamp, reminder));
+        jedis.hset(".reminders", message.getId(), String.format("%s %s %s %s", message.getAuthor().getId(),
+                message.getChannel().getId(), timestamp, reminder));
     }
 
     public void removeReminderEntry(@NotNull String messageId) {
