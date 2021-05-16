@@ -15,7 +15,11 @@ public class EventWaiter {
         original.getJDA().addEventListener(new ListenerAdapter() {
             @Override
             public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
-                if (original.equals(event.getMessage().getReferencedMessage())) {
+                final var referenced = event.getMessage().getReferencedMessage();
+                if (referenced == null)
+                    return;
+
+                if (original.equals(referenced) && original.getAuthor().equals(referenced.getAuthor())) {
                     original.getJDA().removeEventListener(this);
                     handler.accept(event.getMessage());
                 }
