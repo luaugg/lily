@@ -10,6 +10,7 @@ import java.util.List;
 
 public class EvaluateCommand extends AbstractCommandBase {
     private static final ScriptEngineManager MANAGER = new ScriptEngineManager();
+    private static final long OWNER_ID = Long.parseLong(System.getenv("LILY_BOT_OWNER"));
 
     @NotNull
     @Override
@@ -19,7 +20,14 @@ public class EvaluateCommand extends AbstractCommandBase {
 
     @Override
     public void execute(@NotNull Message message, @NotNull String trimmedContent) {
-        // todo: remove just the start and end backticks
+        if (message.getAuthor().getIdLong() != OWNER_ID) {
+            message.replyFormat("Sorry. This is limited to my owner.")
+                    .mentionRepliedUser(false)
+                    .queue();
+
+            return;
+        }
+
         final var code = trimmedContent.replace("`", "");
         final var engine = MANAGER.getEngineByName("groovy");
         engine.put("jda", message.getJDA());
