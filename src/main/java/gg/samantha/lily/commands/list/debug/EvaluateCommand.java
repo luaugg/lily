@@ -7,9 +7,11 @@ import org.jetbrains.annotations.NotNull;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class EvaluateCommand extends AbstractCommandBase {
     private static final ScriptEngineManager MANAGER = new ScriptEngineManager();
+    private static final Pattern CODE_BLOCK_PATTERN = Pattern.compile("```(?:\n|\\w+)(.+)```");
     private static final long OWNER_ID = Long.parseLong(System.getenv("LILY_BOT_OWNER"));
 
     @NotNull
@@ -21,14 +23,24 @@ public class EvaluateCommand extends AbstractCommandBase {
     @Override
     public void execute(@NotNull Message message, @NotNull String trimmedContent) {
         if (message.getAuthor().getIdLong() != OWNER_ID) {
-            message.replyFormat("Sorry. This is limited to my owner.")
+            message.reply("Sorry. This is limited to my owner.")
                     .mentionRepliedUser(false)
                     .queue();
 
             return;
         }
 
-        final var code = trimmedContent.replace("`", "");
+        final var matcher = CODE_BLOCK_PATTERN.matcher(trimmedContent);
+
+        if (!matcher.find()) {
+            message.reply("Please put your code in a code block.")
+                    .mentionRepliedUser(false)
+                    .queue();
+
+            return;
+        }
+
+        final var code = matcher.group(1);
         final var engine = MANAGER.getEngineByName("groovy");
         engine.put("jda", message.getJDA());
         engine.put("message", message);
