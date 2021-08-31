@@ -1,7 +1,7 @@
-defmodule Lily.Commands.Server do
+defmodule Lily.Commands do
   use Agent
 
-  def start_link(_init), do: Agent.start_link(fn -> %{} end, name: __MODULE__)
+  def start_link(init), do: Agent.start_link(fn -> init end, name: __MODULE__)
 
   def fetch_command(name), do: Agent.get(__MODULE__, &Map.get(&1, name))
 
