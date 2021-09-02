@@ -1,7 +1,7 @@
 defmodule Lily.Consumer do
   use Nostrum.Consumer
 
-  alias Lily.Commands
+  import Lily.Commands, only: [fetch_command: 1]
 
   def start_link, do: Consumer.start_link(__MODULE__)
 
@@ -10,7 +10,7 @@ defmodule Lily.Consumer do
       content = String.slice(msg.content, 5..-1)
       [head | tail] = String.split(content)
 
-      case Commands.fetch_command(head) do
+      case fetch_command(head) do
         nil -> :ignore
         command ->
           spawn(fn -> command.(msg, tail) end)
