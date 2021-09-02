@@ -30,8 +30,9 @@ config :logger, :console,
        utc_log: true
 ```
 
+* Clone/download the project. `cd` into it.
 * Get yourself a bot token, put it in the token field.
-* Paste your configuration in `config/config.exs`.
-* Install [Elixir](https://elixir-lang.org/install.html) and `mix run --no-halt` from the CLI.
+* Paste your configuration in `config/config.exs`. You will need to create this file yourself.
+* Install [Elixir](https://elixir-lang.org/install.html) and `mix run --no-halt` from the project root.
 * OR [package a release (recommended)](https://elixir-lang.org/getting-started/mix-otp/config-and-releases.html).
 
