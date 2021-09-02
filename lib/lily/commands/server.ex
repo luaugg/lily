@@ -14,7 +14,7 @@ defmodule Lily.Commands.Server do
     case fetch_command(name) do
       nil -> :ignore # this result will be forwarded to nostrum
 
-      cmd ->
+      command ->
         pid = spawn fn -> command.(message, args) end
         {:ok, pid}
     end
