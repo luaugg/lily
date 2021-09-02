@@ -1,7 +1,7 @@
 defmodule Lily.Consumer do
   use Nostrum.Consumer
 
-  import Lily.Commands, only: [fetch_command: 1]
+  import Lily.Commands.Server, only: [fetch_command: 1]
 
   def start_link, do: Consumer.start_link(__MODULE__)
 
