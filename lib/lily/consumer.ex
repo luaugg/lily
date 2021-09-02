@@ -5,7 +5,7 @@ defmodule Lily.Consumer do
 
   def start_link, do: Consumer.start_link(__MODULE__)
 
-  def handle_event({:MESSAGE_CREATE, msg, _ws_state}) when msg.author.bot == false do
+  def handle_event({:MESSAGE_CREATE, msg, _ws_state}) when msg.author.bot != true do
     if String.starts_with?(msg.content, "lily!") do
       content = String.slice(msg.content, 5..-1)
       [head | tail] = String.split(content)
